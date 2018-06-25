@@ -1,6 +1,4 @@
-
-#Colaborator
-
+# Colaborators
 - Andres Benavides
--Jonathan Martinez 
-
+- Jrnp97
+- Jonathan Martinez 
