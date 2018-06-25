@@ -2,5 +2,5 @@
 # Colaborators
 - John Florez
 - Andres Benavides
-- Jrnp97
+- Jrnp97 (Jaime Negrete)
 - Jonathan Martinez 
