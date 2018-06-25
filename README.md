@@ -1,3 +1,3 @@
-#colaborators
-
-#Jonathan Martinez 
+# Colaborators
+- Jrnp97
+- Jonathan Martinez 
