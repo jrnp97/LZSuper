@@ -9,22 +9,22 @@ import xlsxwriter
 app = current_app
 
 
-# @app.task
-# def crear_archivo_xls():
-#     user = User.objects.filter(is_active=1)
-#
-#     workbook = xlsxwriter.Workbook('media/usuario.xls', {'remove_timezone': True, 'default_date_format': 'dd/mm/yy'})
-#     worksheet = workbook.add_worksheet()
-#
-#     header = ["id", "last_login", "is_superuser", "username", "first_name", "last_name", "email", "is_staff",
-#               "is_active", "date_joined"]
-#
-#     worksheet.write_row(0, 0, header)
-#     [worksheet.write_row(values + 1, 0, list(map(lambda x: user[values].__dict__[x], header))) for values in
-#      range(len(user))]
-#     workbook.close()
-#
-#     return 'media/usuario.xls'
+@app.task
+def crear_archivo_xls():
+    user = User.objects.filter(is_active=1)
+
+    workbook = xlsxwriter.Workbook('media/usuario.xls', {'remove_timezone': True, 'default_date_format': 'dd/mm/yy'})
+    worksheet = workbook.add_worksheet()
+
+    header = ["id", "last_login", "is_superuser", "username", "first_name", "last_name", "email", "is_staff",
+              "is_active", "date_joined"]
+
+    worksheet.write_row(0, 0, header)
+    [worksheet.write_row(values + 1, 0, list(map(lambda x: user[values].__dict__[x], header))) for values in
+     range(len(user))]
+    workbook.close()
+
+    return 'media/usuario.xls'
 
 
 @app.task

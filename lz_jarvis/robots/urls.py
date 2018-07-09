@@ -10,6 +10,5 @@ router.register(r'users', UserViewSet)
 app_name = 'robots'
 urlpatterns = [
     url(r'^', include(router.urls)),
-
 ]
 

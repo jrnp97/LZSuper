@@ -37,3 +37,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             'get_full_name',
             'rseostatus'
         )
+
