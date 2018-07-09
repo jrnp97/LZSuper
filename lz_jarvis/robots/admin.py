@@ -7,6 +7,7 @@ from robots.models import RSeoStatus
 class RSeoStatusAdmin(admin.ModelAdmin):
     list_display = (
         'id',
+        'owner',
         'keyword',
         'domain',
         'google',
