@@ -62,8 +62,11 @@ class TaskOptions(ViewSet):
 
     def create(self, request, *args, **kwargs):
 
-        tasks_exec = [google, yahoo, bing, duck]
-        browser_nav = list(filter(lambda x: request.data[x] is True, ['google', 'yahoo', 'duckduck', 'bing']))
+        rseo = request.data
+
+        tasks_exec = (google, yahoo, bing, duck, )
+
+        browser_nav = list(filter(lambda x: request.data[x] is True, ('google', 'yahoo', 'duckduck', 'bing', )))
 
         chord((task.s(keyword=request.data['keyword']) for task in tasks_exec if task.name in browser_nav))(sendmail.s())
 
