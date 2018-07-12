@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'robots',
+    'accounts',
     'django_celery_results'
 ]
 
@@ -135,4 +136,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
+# Celery configuration
 CELERY_RESULT_BACKEND = 'django-db'
+BROKER_URL = "amqp://localhost"
+
