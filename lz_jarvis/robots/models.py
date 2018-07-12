@@ -23,6 +23,13 @@ class TaskRun(models.Model):
         ('PENDING', 'pending'),
         # ('PAUSED', 'paused')
     )
-    task_id = models.CharField(max_length=200, null=False, blank=False, editable=False)
+    task_id = models.CharField(max_length=200, null=False, blank=False, editable=False, unique=True)
     status = models.CharField(max_length=50, default='PENDING', choices=TASK_STATE_CHOICES)
     task_environment = models.TextField(null=True, blank=True, default=None)
+
+    def as_dict(self):
+        return {
+            'task_id': self.task_id,
+            'status': self.status,
+            'task_environment': self.task_environment,
+        }

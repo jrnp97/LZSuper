@@ -1,12 +1,14 @@
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.viewsets import ViewSet
-from rest_framework.renderers import JSONRenderer
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from robots.models import RSeoStatus, TaskRun
-from robots.api.serializers import TaskResultSerializer, TaskResultStatusSerializer
+from robots.api.serializers import (TaskResultSerializer, TaskResultStatusSerializer,
+                                    TaskRunSerializer, TaskRunStateSerializer)
 from robots.api.permissions import IsOwnerOrReadOnly
 from robots.tasks import show_message
 
@@ -31,13 +33,18 @@ class TaskResultViewSet(ViewSet):
                                           context={'request': request},
                                           many=True
                                           )
-        return JsonResponse(serializer.data, safe=False)
+        return JsonResponse(serializer.data, safe=False, status=200)
 
     def retrieve(self, request, task_id):
-        result = TaskResult.objects.get(task_id=task_id)
-        print(result.result)
-        serializer = TaskResultStatusSerializer(result, context={'request': request})
-        return JsonResponse(serializer.data)
+        try:
+            result = TaskResult.objects.get(task_id=task_id)
+        except ObjectDoesNotExist:
+            raise ValidationError(detail='Task don\'t found')
+        else:
+            serializer = TaskResultStatusSerializer(result,
+                                                    context={'request': request}
+                                                    )
+            return JsonResponse(serializer.data, status=200)
 
 
 task_result_list = TaskResultViewSet.as_view(
@@ -57,10 +64,33 @@ class TaskOptions(ViewSet):
         task = show_message.delay(msg=message)
         return Response({'task_id': task.task_id})
 
-    def status(self, request, task_id=None):
-        pass
+    def list(self, request):
+        tasks = TaskRun.objects.all()
+        serializer = TaskRunSerializer(tasks,
+                                       context={'request': request},
+                                       many=True)
+        return JsonResponse(serializer.data, status=200, safe=False)
+
+    def status(self, request, task_id):
+        try:
+            task = TaskRun.objects.get(task_id=task_id)
+        except ObjectDoesNotExist:
+            raise ValidationError(detail='Task not found')
+        else:
+            serializer = TaskRunStateSerializer(task,
+                                                context={'request': request}
+                                                )
+            return JsonResponse(serializer.data, status=200)
 
 
 create_task = TaskOptions.as_view(
     {'post': 'create'}
+)
+
+task_execution_list = TaskOptions.as_view(
+    {'get': 'list'}
+)
+
+task_execution_detail = TaskOptions.as_view(
+    {'get': 'status'}
 )
