@@ -61,8 +61,8 @@ class TaskOptions(ViewSet):
 
     def create(self, request):
         message = request.data
-        task = show_message.delay(msg=message)
-        return Response({'task_id': task.task_id})
+        task_class = show_message.s(msg=message).delay()
+        return Response({'task_id': task_class.task_id})
 
     def list(self, request):
         tasks = TaskRun.objects.all()
@@ -77,9 +77,7 @@ class TaskOptions(ViewSet):
         except ObjectDoesNotExist:
             raise ValidationError(detail='Task not found')
         else:
-            serializer = TaskRunStateSerializer(task,
-                                                context={'request': request}
-                                                )
+            serializer = TaskRunStateSerializer(task, context={'request': request})
             return JsonResponse(serializer.data, status=200)
 
 
