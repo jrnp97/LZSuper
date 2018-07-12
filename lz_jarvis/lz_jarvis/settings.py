@@ -139,3 +139,4 @@ REST_FRAMEWORK = {
 # Celery configuration
 CELERY_RESULT_BACKEND = 'django-db'
 BROKER_URL = "amqp://localhost"
+

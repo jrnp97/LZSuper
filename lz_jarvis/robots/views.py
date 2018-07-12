@@ -1,16 +1,17 @@
-from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.viewsets import ViewSet
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
+
+from robots.tasks import google, duck, yahoo, bing, sendmail
+
+from celery import group, chord, chain
 
 from robots.models import RSeoStatus, TaskRun
 from robots.api.serializers import (TaskResultSerializer, TaskResultStatusSerializer,
                                     TaskRunSerializer, TaskRunStateSerializer)
 from robots.api.permissions import IsOwnerOrReadOnly
-from robots.tasks import show_message
 
 from django_celery_results.models import TaskResult
 
@@ -57,12 +58,17 @@ task_result_detail = TaskResultViewSet.as_view(
 
 
 class TaskOptions(ViewSet):
-    permission_classes = (IsOwnerOrReadOnly, )
+    permission_classes = (IsOwnerOrReadOnly,)
 
-    def create(self, request):
-        message = request.data
-        task_class = show_message.s(msg=message).delay()
-        return Response({'task_id': task_class.task_id})
+    def create(self, request, *args, **kwargs):
+
+        tasks_exec = [google, yahoo, bing, duck]
+        browser_nav = list(filter(lambda x: request.data[x] is True, ['google', 'yahoo', 'duckduck', 'bing']))
+
+        chord((task.s(keyword=request.data['keyword']) for task in tasks_exec if task.name in browser_nav))(sendmail.s())
+
+
+        return JsonResponse({'message': 'Task send successfully'})
 
     def list(self, request):
         tasks = TaskRun.objects.all()
@@ -81,7 +87,7 @@ class TaskOptions(ViewSet):
             return JsonResponse(serializer.data, status=200)
 
 
-create_task = TaskOptions.as_view(
+run_task = TaskOptions.as_view(
     {'post': 'create'}
 )
 

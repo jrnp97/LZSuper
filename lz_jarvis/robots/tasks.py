@@ -1,17 +1,23 @@
 from __future__ import absolute_import
 
+import os
+
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
+
 import time
 
-# from django.core.mail import EmailMessage
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 
 from celery.worker.request import Request
 from celery import current_app
 from celery import Task
-
+import smtplib
 from robots.models import TaskRun
 
+BASE_DIR = os.path.dirname(__file__)
 app = current_app
 
 
@@ -24,7 +30,6 @@ class CustomRequest(Request):
 
 
 class CustomTask(Task):
-
     Request = CustomRequest
 
     def update_state(self, task_id=None, state=None, meta=None):
@@ -69,23 +74,116 @@ class CustomTask(Task):
             pass
 
 
-@app.task(base=CustomTask, bind=True)
-def show_message(self, *args, **kwargs):
-    time.sleep(60)
-    self.update_state(state='STARTED', meta={'msg': 'Working run'})
-    message = kwargs.pop('msg', None)
-    print(f"The worker received this {message}")
-    return "By"
+# Tasks
+@app.task(name='google', base=CustomTask, bind=True)
+def google(self, **kwargs):
+    url = "http://www.google.com"
+    keywords = kwargs.pop('keyword', None)
 
 
 
-# @app.task
-# def send_email():
-#     e = EmailMessage()
-#     e.subject = 'Reporte Usuarios'
-#     e.to = ['<>', ]
-#     e.from_email = '<>'
-#     e.body = 'Anexo reporte en archivo xls'
-#     e.send()
-#
-#     return 'Mensaje Enviado'
+
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
+    wait_driver = WebDriverWait(driver=driver, timeout=30)
+    try:
+        print("Start SeoRobot Google")
+        driver.get(url)  # Url de la pagina a Buscar
+        driver.find_element_by_name('q').send_keys(keywords, Keys.ENTER)
+        time.sleep(10)
+        links = driver.find_elements_by_css_selector('.rc > .r a')
+        print("end")
+
+    finally:
+        print("Finished SeoRobot Google")
+        result = {"result": dict([(i, _.get_attribute('href')) for i, _ in enumerate(links, 1)])}
+        driver.quit()
+
+    return result
+
+
+@app.task(name='yahoo', base=CustomTask, bind=True)
+def yahoo(self, **kwargs):
+    url = "https://www.yahoo.com"
+    keywords = kwargs.pop('keyword', None)
+
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
+    wait_driver = WebDriverWait(driver=driver, timeout=30)
+
+    try:
+        print("Start SeoRobot Yahoo")
+        driver.get(url)  # Url de la pagina a Buscar
+        driver.find_element_by_name('p').send_keys(keywords, Keys.ENTER)
+        time.sleep(10)
+        links = driver.find_elements_by_css_selector('h3.title a')
+        print("Geting Links...")
+
+        print("Finished SeoRobot Yahoo")
+
+    finally:
+        result = {"result": dict([(i, _.get_attribute('href')) for i, _ in enumerate(links, 1)])}
+        driver.quit()
+
+    return result
+
+
+@app.task(name='bing', base=CustomTask, bind=True)
+def bing(self, **kwargs):
+    url = "http://www.bing.com"
+    keywords = kwargs.pop('keyword', None)
+
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
+    wait_driver = WebDriverWait(driver=driver, timeout=30)
+    try:
+        print("Start SeoRobot Bing")
+        driver.get(url)  # Url de la pagina a Buscar
+        driver.find_element_by_name('q').send_keys(keywords, Keys.ENTER)
+        time.sleep(10)
+        links = driver.find_elements_by_css_selector('.b_algo a')
+
+    finally:
+
+        print("Finished SeoRobot Bing")
+        result = {"result": dict([(i, _.get_attribute('href')) for i, _ in enumerate(links, 1)])}
+
+        driver.quit()
+
+    return result
+
+
+@app.task(name='duckduck', base=CustomTask, bind=True)
+def duck(self, **kwargs):
+    url = "https://www.duckduckgo.com"
+    keywords = kwargs.pop('keyword', None)
+
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
+    wait_driver = WebDriverWait(driver=driver, timeout=30)
+
+    try:
+        print("Start SeoRobot DuckDuck")
+        driver.get(url)  # Url de la pagina a Buscar
+        driver.find_element_by_name('q').send_keys(keywords, Keys.ENTER)
+        time.sleep(10)
+        links = driver.find_elements_by_css_selector('.result__title a')
+
+    finally:
+        print("Finished SeoRobot DuckDuck")
+        result = {"result": dict([(i, _.get_attribute('href')) for i, _ in enumerate(links, 1)])}
+
+        driver.quit()
+
+    return result
+
+
+@app.task(serializer='json', base=CustomTask, bind=True)
+def sendmail(self, data):
+    print(data)
+
+    print("returned", data)
+
+    send_data = '[{}] {} {}'.format(data['type'], data['code'], data['body'])
+    # server = smtplib.SMTP('smtp.gmail.com', 587)
+    # server.starttls()
+    # server.login('ivanspoof@gmail.com', 'ghdqzh30db2')
+    # server.sendmail('ivanspoo@gmail.com', 'ivanspoof@gmail.com', send_data)
+    # server.quit()
+    return data
