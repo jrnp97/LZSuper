@@ -1,55 +1,110 @@
 from __future__ import absolute_import
 
-from django.core.mail import EmailMessage
+import time
+
+# from django.core.mail import EmailMessage
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
+
+from celery.worker.request import Request
 from celery import current_app
-import os
-from django.contrib.auth.models import User
-import xlsxwriter
+from celery import Task
+
+from robots.models import TaskRun
 
 app = current_app
 
 
-@app.task
-def crear_archivo_xls():
-    user = User.objects.filter(is_active=1)
+class CustomRequest(Request):
 
-    workbook = xlsxwriter.Workbook('media/usuario.xls', {'remove_timezone': True, 'default_date_format': 'dd/mm/yy'})
-    worksheet = workbook.add_worksheet()
-
-    header = ["id", "last_login", "is_superuser", "username", "first_name", "last_name", "email", "is_staff",
-              "is_active", "date_joined"]
-
-    worksheet.write_row(0, 0, header)
-    [worksheet.write_row(values + 1, 0, list(map(lambda x: user[values].__dict__[x], header))) for values in
-     range(len(user))]
-    workbook.close()
-
-    return 'media/usuario.xls'
+    def on_accepted(self, pid, time_accepted):
+        super(CustomRequest, self).on_accepted(pid, time_accepted)
+        # Task accept going to save on database
+        TaskRun.objects.create(task_id=self.task_id).save()
 
 
-@app.task
-def send_email():
-    e = EmailMessage()
-    e.subject = 'Reporte Usuarios'
-    e.to = ['johnflorez_1289@hotmail.com', ]
-    e.from_email = 'ivanspoof@gmail.com'
-    e.body = 'Anexo reporte en archivo xls'
-    #e.attach_file(ruta)
-    e.send()
+class CustomTask(Task):
 
-    return 'Mensaje Enviado'
+    Request = CustomRequest
+
+    def update_state(self, task_id=None, state=None, meta=None):
+        """Update task state.
+
+        Arguments:
+            task_id (str): Id of the task to update.
+                Defaults to the id of the current task.
+            state (str): New state.
+            meta (Dict): State meta-data.
+        """
+        if task_id is None:
+            task_id = self.request.id
+
+        if state == 'STARTED' or state == 'PAUSED' or state == 'PENDING':
+            try:
+                task_db = TaskRun.objects.get(task_id=task_id)
+                print(task_db)
+                task_db.status = state
+                task_db.save()
+            except ObjectDoesNotExist:
+                # If task don't exist on db will be create
+                try:
+                    TaskRun.objects.create(task_id=task_id, status=state).save()
+                except IntegrityError:
+                    # Unique Constraint Error (Some thread cloud be write on DB before) <To check>
+                    pass
+        else:
+            print(task_id)
+
+        self.backend.store_result(task_id, meta, state)
+
+    def after_return(self, status, retval, task_id, args, kwargs, einfo):
+        """Handltask_ider called after the task returns.
+
+        Arguments:
+            status (str): Current task state.
+            retval (Any): Task return value/exception.
+            task_id (str): Unique id of the task.
+            args (Tuple): Original arguments for the task.
+            kwargs (Dict): Original keyword arguments for the task.
+            einfo (~billiard.einfo.ExceptionInfo): Exception information.
+
+        Returns:
+            None: The return value of this handler is ignored.
+        """
+        if status == 'PAUSED':
+            pass  # Save robot serialized when is PAUSED
+        else:  # Clean on TaskRun database task totally executed
+            try:
+                TaskRun.objects.get(task_id=task_id).delete()
+                print(f"Task {task_id} deleted")
+            except Exception as e:
+                print(f"Task {task_id} isn't enable to delete, error {e}")
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        # Delete task from task running table
+        try:
+            TaskRun.objects.get(task_id=task_id).delete()
+            print(f"Task {task_id} deleted")
+        except Exception as e:
+            print(f"Task {task_id} isn't enable to delete, error {e}")
+
+
+@app.task(base=CustomTask, bind=True)
+def show_message(self, *args, **kwargs):
+    self.update_state(state='STARTED', meta={'msg': 'i\'m a pretty message'})
+    message = kwargs.pop('msg', None)
+    print(f"The worker received this {message}")
+    time.sleep(10)
+    return "By"
 
 
 # @app.task
-# def borra_archivo(ruta):
-#     os.remove(ruta)
+# def send_email():
+#     e = EmailMessage()
+#     e.subject = 'Reporte Usuarios'
+#     e.to = ['<>', ]
+#     e.from_email = '<>'
+#     e.body = 'Anexo reporte en archivo xls'
+#     e.send()
 #
-#
-# @app.task(bind=True)
-# def reporte_usuario(self):
-#     (crear_archivo_xls.s() | send_email.s() | borra_archivo.s())()
-
-
-@app.task
-def prueba():
-    return 'Hola Mundo'
+#     return 'Mensaje Enviado'
