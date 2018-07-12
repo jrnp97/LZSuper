@@ -1,55 +1,79 @@
 from __future__ import absolute_import
-
-from django.core.mail import EmailMessage
 from celery import current_app
-import os
-from django.contrib.auth.models import User
-import xlsxwriter
 
+import os
+import time
+
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
+
+BASE_DIR = os.path.dirname(__file__)
+
+driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
+wait_driver = WebDriverWait(driver=driver, timeout=30)
 app = current_app
 
 
-@app.task
-def crear_archivo_xls():
-    user = User.objects.filter(is_active=1)
+@app.task(name='google')
+def google(keywords):
 
-    workbook = xlsxwriter.Workbook('media/usuario.xls', {'remove_timezone': True, 'default_date_format': 'dd/mm/yy'})
-    worksheet = workbook.add_worksheet()
+    url = "http://www.google.com"
+    try:
+        print("Start SeoRobot Google")
+        driver.get(url)  # Url de la pagina a Buscar
+        driver.find_element_by_name('q').send_keys(keywords, Keys.ENTER)
+        links = driver.find_elements_by_css_selector('.rc > .r a')
 
-    header = ["id", "last_login", "is_superuser", "username", "first_name", "last_name", "email", "is_staff",
-              "is_active", "date_joined"]
+    finally:
+        time.sleep(10)
+        print("Finished SeoRobot Google")
+        driver.quit()
 
-    worksheet.write_row(0, 0, header)
-    [worksheet.write_row(values + 1, 0, list(map(lambda x: user[values].__dict__[x], header))) for values in
-     range(len(user))]
-    workbook.close()
-
-    return 'media/usuario.xls'
-
-
-@app.task
-def send_email():
-    e = EmailMessage()
-    e.subject = 'Reporte Usuarios'
-    e.to = ['johnflorez_1289@hotmail.com', ]
-    e.from_email = 'ivanspoof@gmail.com'
-    e.body = 'Anexo reporte en archivo xls'
-    #e.attach_file(ruta)
-    e.send()
-
-    return 'Mensaje Enviado'
+    return dict([(i, _.get_attribute('href')) for i, _ in enumerate(links, 1) ])
 
 
-# @app.task
-# def borra_archivo(ruta):
-#     os.remove(ruta)
-#
-#
-# @app.task(bind=True)
-# def reporte_usuario(self):
-#     (crear_archivo_xls.s() | send_email.s() | borra_archivo.s())()
+@app.task(name='yahoo')
+def yahoo(keywords):
+    url = "https://www.yahoo.com"
+    return "Executing yahoo"
 
 
-@app.task
-def prueba():
-    return 'Hola Mundo'
+@app.task(name='bing')
+def bing(keywords):
+
+    url = "http://www.bing.com"
+
+    try:
+        print("Start SeoRobot Bing")
+        driver.get(url)  # Url de la pagina a Buscar
+        driver.find_element_by_name('q').send_keys(keywords, Keys.ENTER)
+        links = driver.find_elements_by_css_selector('.b_algo a')
+
+    finally:
+        time.sleep(10)
+        print("Finished SeoRobot Bing")
+        driver.quit()
+
+    return  dict([(i, _.get_attribute('href')) for i, _ in enumerate(links, 1)])
+
+
+@app.task(name='duckduck')
+def duck(keywords):
+    url = "https://www.duckduckgo.com"
+    try:
+        print("Start SeoRobot DuckDuck")
+        driver.get(url)  # Url de la pagina a Buscar
+        driver.find_element_by_name('q').send_keys(keywords, Keys.ENTER)
+        links = driver.find_elements_by_css_selector('.result__title a')
+
+    finally:
+        print("Finished SeoRobot DuckDuck")
+        time.sleep(10)
+        driver.quit()
+
+    return dict([(i, _.get_attribute('href')) for i, _ in enumerate(links, 1)])
+
+
+
+
