@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'robots',
+    'accounts',
+    'django_celery_results'
 ]
 
 MIDDLEWARE = [
@@ -133,3 +135,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
+
+# Celery configuration
+CELERY_RESULT_BACKEND = 'django-db'
+BROKER_URL = "amqp://localhost"
