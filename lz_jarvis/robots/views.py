@@ -21,6 +21,8 @@ from django_celery_results.models import TaskResult
 
 class TaskResultViewSet(ViewSet):
 
+    permission_classes = (IsAuthenticated, )
+
     def list(self, request):
         results = TaskResult.objects.all()
         serializer = TaskResultSerializer(results,
