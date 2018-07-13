@@ -4,16 +4,23 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.viewsets import ViewSet
 from rest_framework.exceptions import ValidationError
 
+
 from robots.tasks import google, duck, yahoo, bing, sendmail
 
-from celery import group, chord, chain
+from celery import  chord
 
 from robots.models import RSeoStatus, TaskRun
 from robots.api.serializers import (TaskResultSerializer, TaskResultStatusSerializer,
                                     TaskRunSerializer, TaskRunStateSerializer)
-from robots.api.permissions import IsOwnerOrReadOnly
+
+
+from selenium.webdriver.chrome.webdriver import WebDriver
+import os
 
 from django_celery_results.models import TaskResult
+
+
+BASE_DIR = os.path.dirname(__file__)
 
 robot_info = {
     "keyword": "pizzeta",
@@ -27,6 +34,7 @@ robot_info = {
 
 
 class TaskResultViewSet(ViewSet):
+
 
     def list(self, request):
         results = TaskResult.objects.all()
@@ -58,14 +66,13 @@ task_result_detail = TaskResultViewSet.as_view(
 
 
 class TaskOptions(ViewSet):
-    permission_classes = (IsOwnerOrReadOnly,)
 
     def create(self, request, *args, **kwargs):
 
         tasks_exec = [google, yahoo, bing, duck]
-        browser_nav = list(filter(lambda x: request.data[x] is True, ['google', 'yahoo', 'duckduck', 'bing']))
+        browser_nav = list(filter(lambda x: bool(request.data[x]) is True, ['google', 'yahoo', 'duckduck', 'bing']))
 
-        chord((task.s(keyword=request.data['keyword']) for task in tasks_exec if task.name in browser_nav))(sendmail.s())
+        chord((task.s(keyword=request.data['keyword'], ) for task in tasks_exec if task.name in browser_nav))(sendmail.s())
 
 
         return JsonResponse({'message': 'Task send successfully'})
