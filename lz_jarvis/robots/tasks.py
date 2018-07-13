@@ -177,10 +177,13 @@ def sendmail(self, data):
 
     print("returned", data)
 
-    #send_data = '[{}] {} {}'.format(data['type'], data['code'], data['body'])
+    # send_data = '[{}] {} {}'.format(data['type'], data['code'], data['body'])
     # server = smtplib.SMTP('smtp.gmail.com', 587)
     # server.starttls()
     # server.login('ivanspoof@gmail.com', 'ghdqzh30db2')
     # server.sendmail('ivanspoo@gmail.com', 'ivanspoof@gmail.com', send_data)
     # server.quit()
     return data
+
+
+
