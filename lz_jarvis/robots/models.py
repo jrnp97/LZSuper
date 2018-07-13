@@ -15,6 +15,17 @@ class RSeoStatus(models.Model):
     def __str__(self):
         return self.keyword
 
+    def as_dict(self):
+        return {
+            "keyword": self.keyword,
+            "domain": self.domain,
+            "google": self.google,
+            "yahoo": self.yahoo,
+            "bing": self.bing,
+            "duckduck": self.duckduck,
+            "destination": self.destination,
+        }
+
 
 class TaskRun(models.Model):
     """ Model with only tasks on executing """

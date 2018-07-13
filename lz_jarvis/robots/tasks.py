@@ -14,7 +14,7 @@ from django.db.utils import IntegrityError
 from celery.worker.request import Request
 from celery import current_app
 from celery import Task
-import smtplib
+
 from robots.models import TaskRun
 
 BASE_DIR = os.path.dirname(__file__)
@@ -80,7 +80,7 @@ def google(self, **kwargs):
     url = "http://www.google.com"
     keywords = kwargs.pop('keyword', None)
 
-    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver.exe'))
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
     wait_driver = WebDriverWait(driver=driver, timeout=30)
     try:
         print("Start SeoRobot Google")

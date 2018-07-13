@@ -1,8 +1,10 @@
-from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token, verify_jwt_token
-from django.conf.urls import url, include
+from django.conf.urls import url
+
+from accounts.views import auth_token_login, auth_token_logout
+
+app_name = "accounts"
 
 urlpatterns = [
-    url(r'^login/', obtain_jwt_token),
-    url(r'^refresh/', refresh_jwt_token),
-    url(r'^verify/', verify_jwt_token),
+    url(r'^login/$', auth_token_login, name='token_login'),
+    url(r'^logout/$', auth_token_logout, name='token_logout')
 ]
