@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.authentication.CustomTokenMiddleware',
 ]
 
 ROOT_URLCONF = 'lz_jarvis.urls'
@@ -130,11 +131,18 @@ EMAIL_HOST_USER = 'pruebadajngo@gmail.com'
 EMAIL_HOST_PASSWORD = 'pruebadjango123'
 EMAIL_PORT = 587
 
-
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES':(
+        'rest_framework.authentication.SessionAuthentication',
+        'accounts.authentication.CustomTokenAuthentication',
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
+
+# Auth token configuration
+REST_TOKEN_EXPIRE_SECONDS = 300
+TOKEN_EXPIRE_UPDATE_EVERY_REQUEST = False
 
 # Celery configuration
 CELERY_RESULT_BACKEND = 'django-db'
