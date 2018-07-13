@@ -4,5 +4,4 @@ from django.conf.urls import url, include
 urlpatterns = [
     url(r'^login/', obtain_jwt_token),
     url(r'^refresh/', refresh_jwt_token),
-    url(r'^verify/', verify_jwt_token),
 ]
