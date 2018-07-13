@@ -80,9 +80,6 @@ def google(self, **kwargs):
     url = "http://www.google.com"
     keywords = kwargs.pop('keyword', None)
 
-
-
-
     driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
     wait_driver = WebDriverWait(driver=driver, timeout=30)
     try:
