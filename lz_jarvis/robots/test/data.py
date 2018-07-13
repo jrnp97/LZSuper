@@ -10,9 +10,11 @@ extra_cfg = {
     "yahoo": 1,
     "bing": 1,
     "duckduck": 1,
-    "destination": "pruebadajngo@gmail.com"
+    "destination": "pruebadajngo@gmail.com",
+    "start": 1
     }
 }
+
 
 extra_cfg1 = {
 "variables": {
@@ -23,10 +25,11 @@ extra_cfg1 = {
     "yahoo": 1,
     "bing": 1,
     "duckduck": 1,
-    "destination": "pruebadajngo@gmail.com"
+    "destination": "pruebadajngo@gmail.com",
+    "start": 1
     }
 }
-
+"""
 
 extra_cfg2 = {
 "variables": {
@@ -68,3 +71,4 @@ extra_cfg4 = {
     "destination": "pruebadajngo@gmail.com"
     }
 }
+"""
