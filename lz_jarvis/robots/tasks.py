@@ -103,7 +103,7 @@ def yahoo(self, **kwargs):
     url = "https://www.yahoo.com"
     keywords = kwargs.pop('keyword', None)
 
-    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver.exe'))
     wait_driver = WebDriverWait(driver=driver, timeout=30)
 
     try:
@@ -114,9 +114,9 @@ def yahoo(self, **kwargs):
         links = driver.find_elements_by_css_selector('h3.title a')
         print("Geting Links...")
 
-        print("Finished SeoRobot Yahoo")
 
     finally:
+        print("Finished SeoRobot Yahoo")
         result = {"result": dict([(i, _.get_attribute('href')) for i, _ in enumerate(links, 1)])}
         driver.quit()
 
@@ -128,7 +128,7 @@ def bing(self, **kwargs):
     url = "http://www.bing.com"
     keywords = kwargs.pop('keyword', None)
 
-    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver.exe'))
     wait_driver = WebDriverWait(driver=driver, timeout=30)
     try:
         print("Start SeoRobot Bing")
@@ -152,7 +152,7 @@ def duck(self, **kwargs):
     url = "https://www.duckduckgo.com"
     keywords = kwargs.pop('keyword', None)
 
-    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver.exe'))
     wait_driver = WebDriverWait(driver=driver, timeout=30)
 
     try:
@@ -177,7 +177,7 @@ def sendmail(self, data):
 
     print("returned", data)
 
-    send_data = '[{}] {} {}'.format(data['type'], data['code'], data['body'])
+    #send_data = '[{}] {} {}'.format(data['type'], data['code'], data['body'])
     # server = smtplib.SMTP('smtp.gmail.com', 587)
     # server.starttls()
     # server.login('ivanspoof@gmail.com', 'ghdqzh30db2')
