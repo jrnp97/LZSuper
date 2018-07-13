@@ -71,7 +71,7 @@ class TaskOptions(ViewSet):
             if run_status:
                 tasks_exec = (google, yahoo, bing, duck,)
 
-                browser_nav = list(filter(lambda x: request.data[x] is True, ('google',
+                browser_nav = list(filter(lambda x: bool(request.data[x]) is True, ('google',
                                                                               'yahoo',
                                                                               'duckduck',
                                                                               'bing',)
@@ -138,7 +138,7 @@ class RobotsViewSet(ViewSet):
 
             robot_dict = robot_info.as_dict()
 
-            browser_nav = list(filter(lambda x: robot_dict[x] is True, ('google',
+            browser_nav = list(filter(lambda x: bool(robot_dict[x]) is True, ('google',
                                                                         'yahoo',
                                                                         'duckduck',
                                                                         'bing',)

@@ -103,7 +103,7 @@ def yahoo(self, **kwargs):
     url = "https://www.yahoo.com"
     keywords = kwargs.pop('keyword', None)
 
-    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver.exe'))
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
     wait_driver = WebDriverWait(driver=driver, timeout=30)
 
     try:
@@ -128,7 +128,7 @@ def bing(self, **kwargs):
     url = "http://www.bing.com"
     keywords = kwargs.pop('keyword', None)
 
-    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver.exe'))
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
     wait_driver = WebDriverWait(driver=driver, timeout=30)
     try:
         print("Start SeoRobot Bing")
@@ -152,7 +152,7 @@ def duck(self, **kwargs):
     url = "https://www.duckduckgo.com"
     keywords = kwargs.pop('keyword', None)
 
-    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver.exe'))
+    driver = WebDriver(executable_path=os.path.join(BASE_DIR, 'driver', 'chromedriver'))
     wait_driver = WebDriverWait(driver=driver, timeout=30)
 
     try:

@@ -5,11 +5,11 @@ stages:
     # Log in as user and save the login token for future requests
   - name: Login as test user
     request:
-      url: http://127.0.0.1:8000/login/
+      url: http://127.0.0.1:8000/auth/login/
       method: POST
       json:
-        username: "andres"
-        password: "admin1234"
+        username: "admin"
+        password: "admin123"
     response:
       status_code: 200
       save:
@@ -25,7 +25,7 @@ stages:
 
   - name: Get user location
     request:
-      url: http://127.0.0.1:8000/task/create/
+      url: http://127.0.0.1:8000/robot/create/
       json:
         "keyword": "{keyword:s}"
         "domain": "{domain:s}"
@@ -34,6 +34,7 @@ stages:
         "bing": !int   "{bing:d}"
         "duckduck": !int  "{duckduck:d}"
         "destination": "{destination:s}"
+        "start": !int  "{start:d}"
       method: POST
       headers:
         Authorization: "JWT {test_user_login_token}"

@@ -1,5 +1,6 @@
+""" Test to prove URI to Init a robot"""
 from tavern.core import run
-from data import extra_cfg,extra_cfg1,extra_cfg2,extra_cfg3,extra_cfg4
+from data import extra_cfg, extra_cfg1
 
 def test_conf(list_config):
     for _ in list_config:
@@ -10,4 +11,4 @@ def test_conf(list_config):
 
 
 
-test_conf([extra_cfg,extra_cfg1,extra_cfg2,extra_cfg3,extra_cfg4])
+test_conf([extra_cfg, extra_cfg1])
