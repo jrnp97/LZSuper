@@ -6,12 +6,14 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 
+
 from robots.tasks import google, duck, yahoo, bing, sendmail
 
-from celery import group, chord, chain
+from celery import  chord
 
 from robots.models import RSeoStatus, TaskRun
 from robots.api.serializers import (TaskResultSerializer, TaskResultStatusSerializer,
+
                                     TaskRunSerializer, TaskRunStateSerializer,
                                     RSeoSerializer)
 from robots.api.permissions import IsOwnerOrReadOnly
@@ -20,6 +22,7 @@ from django_celery_results.models import TaskResult
 
 
 class TaskResultViewSet(ViewSet):
+
 
     def list(self, request):
         results = TaskResult.objects.all()
@@ -51,6 +54,7 @@ task_result_detail = TaskResultViewSet.as_view(
 
 
 class TaskOptions(ViewSet):
+
     permission_classes = (IsOwnerOrReadOnly, IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
