@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
+import datetime
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -40,8 +40,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'robots',
     'accounts',
-    'django_celery_results'
+    'django_celery_results',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.authentication.CustomTokenMiddleware',
 ]
 
 ROOT_URLCONF = 'lz_jarvis.urls'
@@ -130,11 +132,22 @@ EMAIL_HOST_USER = 'pruebadajngo@gmail.com'
 EMAIL_HOST_PASSWORD = 'pruebadjango123'
 EMAIL_PORT = 587
 
-
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'accounts.authentication.CustomTokenAuthentication',
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
 }
+
+# Auth token configuration
+REST_TOKEN_EXPIRE_SECONDS = 300
+TOKEN_EXPIRE_UPDATE_EVERY_REQUEST = False
 
 # Celery configuration
 CELERY_RESULT_BACKEND = 'django-db'
