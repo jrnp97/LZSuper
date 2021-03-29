@@ -30,7 +30,7 @@ pika==0.12.0
 pkg-resources==0.0.0
 pluggy==0.6.0
 py==1.5.4
-Pygments==2.2.0
+Pygments==2.7.4
 PyJWT==1.6.4
 pykwalify==1.6.1
 pytest==3.6.3
